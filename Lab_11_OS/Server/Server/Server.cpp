@@ -11,6 +11,101 @@ char path[] = "D:\\Studying\\Course 2\\Code\\Operation System\\Lab_11_OS\\Virtua
 string bestIdeas;
 bool voting = false;
 
+
+int findMin(vector<int>& v) {
+    int min = v[0];
+
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] < min) min = v[i];
+    }
+
+    return min;
+}
+
+int findMax(vector<int>& v) {
+    int max = v[0];
+
+    for (auto val : v) {
+        if (val > max) max = val;
+    }
+
+    return max;
+}
+
+void CountingSearch(vector<int> v) {
+    int min = findMin(v);
+    int max = findMax(v);
+    int best_ideas[3];
+    int range = max - min + 1;
+
+    vector<int> table(range);
+
+    for (int i = 0; i < v.size(); i++) {
+        table[v[i] - min]++;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        max = 0;
+        best_ideas[i] = 0;
+        for (int j = 0; j < table.size(); j++) {
+            if (table[j] != 0) {
+                if (table[max] < table[j]) {
+                    max = j;
+                }
+            }
+        }
+        table[max] = 0;
+        best_ideas[i] = max + min;
+    }
+
+            //Write to File
+    string bestIdeaOutput;
+    cout << "Best ideas: " << endl;
+    int tempCount = 1;
+    ifstream in(path);
+    
+        if (in.is_open())
+        {
+            while (getline(in, bestIdeas))
+            {
+                for (int i = 0; i < 3; i++) {
+                    if (tempCount == best_ideas[i]) {
+                        cout << to_string(tempCount) << ". " << bestIdeas << endl;
+                        bestIdeaOutput += to_string(tempCount) + ". " + bestIdeas + "\n";
+                    }
+                }
+                tempCount++;
+            }
+        }
+        in.close();
+
+        SetFileAttributesA(path, FILE_ATTRIBUTE_NORMAL);
+        file = CreateFileA(path, GENERIC_WRITE,  FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (file == INVALID_HANDLE_VALUE) {
+            cout << endl << "Cannot open file!";
+            getchar();
+            return;
+        }
+        cout << "Write to virtual desk!";
+        SetFilePointer(file, 0, 0, FILE_END);
+        string msg = "\nBest ideas: \n";
+        if(WriteFile(file, (void*)msg.c_str(), msg.length(), 0, NULL) == FALSE) {
+            cout << endl << "Cannot write to file!";
+            getchar();
+            return;
+        }    
+        SetFilePointer(file, 0, 0, FILE_END);
+        if (WriteFile(file, (void*)bestIdeaOutput.c_str(), bestIdeaOutput.length(), 0, NULL) == FALSE) {
+            cout << endl << "Cannot write to file!";
+            getchar();
+            return;
+        }
+
+        getchar();
+        CloseHandle(file);
+}
+
+
 void TimeIsUp() {
     Sleep(3000);
     cout << "Time is up! Close file" << endl;
@@ -28,8 +123,9 @@ void TimeIsUp() {
     output.clear();
     DWORD dwRead;
 
+ 
 
-    ifstream in(path); 
+    ifstream in(path);
     if (in.is_open())
     {
         while (getline(in, output))
@@ -38,10 +134,9 @@ void TimeIsUp() {
             counter++;
         }
     }
-    in.close();     
-    
+    in.close();
 
-    cout << "Start voiting!";
+    cout << "Start voting!";
     voting = true;
     getchar();
 
@@ -54,7 +149,7 @@ int main()
     //Create file
     file = CreateFileA(path, GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     SetFileAttributesA(path, FILE_ATTRIBUTE_NORMAL);
-    //CloseHandle(file);
+
 
     //Initialize winsock
     WSADATA wsData;
@@ -77,7 +172,7 @@ int main()
     sockaddr_in hint;
     hint.sin_family = AF_INET;
     hint.sin_port = htons(54000);
-    hint.sin_addr.S_un.S_addr = INADDR_ANY; //Could also use inet_pton
+    hint.sin_addr.S_un.S_addr = INADDR_ANY; 
 
     bind(listening, (sockaddr*)&hint, sizeof(hint));
 
@@ -89,8 +184,10 @@ int main()
 
     FD_SET(listening, &master);
 
-
-
+    vector<char> res;
+    vector<int> indexOfIdeas;
+    string tempStr;
+    int isEndCounter = 0;
     clock_t start, stop;
     double result = 0;
     start = clock();
@@ -99,7 +196,7 @@ int main()
         fd_set copy = master;
         int count = 1;
         int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
-        socketCount = 2;    
+
 
         for (int i = 0; i < socketCount; i++) {
             SOCKET sock = copy.fd_array[i];
@@ -123,31 +220,49 @@ int main()
                 int bytesIn = recv(sock, buf, 4096, 0);
                 if (countTime == 0 && buf[0] == 'b') {
                     countTime++;
+                    getchar();
                     TimeIsUp();
                 }
-                
-//--------------------------------------------------------------------------------------------------------------
-            for (int i = 0; i < strlen(buf); i++) {
-                 if (buf[i] >= 48 && buf[i] <= 57) {
-                     int numb = buf[i] - 48;
 
-                     int tempCount = 1;
-                     ifstream in(path);
-                     if (in.is_open())
-                     {
-                         while (getline(in, bestIdeas))
-                         {
-                             int numb = buf[i] - 48;
-                            if (tempCount == numb) {
-                                cout << endl << to_string(tempCount) << ". " << bestIdeas << endl;
-                            }
-                            tempCount++;
-                         }
-                     }
-                     in.close();
-                 }
-            }
-//-------------------------------------------------------------------------------------------------------------------            
+                //--------------------------------------------------------------------------------------------------------------
+                for (int i = 0; i < bytesIn; i++) {
+                    
+                    if (buf[i] >= 48 && buf[i] <= 57 || buf[i] == 105 || buf[i] == 101) {     
+                        //cout << buf[i] << " ";
+                        if (buf[i] == 101) {
+                            isEndCounter++;
+                        }
+                        if (buf[i] >= 48 && buf[i] <= 57 || buf[i] == 105) {
+                            res.push_back(buf[i]);
+                        }
+                    }
+                    
+                }
+
+                if (isEndCounter == socketCount) {
+                    for (int j = 0; j < res.size(); j++) {
+                        //cout << res[j] << " ";
+                        if (res[j] != 105) {
+                            indexOfIdeas.push_back(res[j] - 48);
+                        }
+                        else {
+                            j++;
+                            tempStr += res[j];
+                            j++;
+                            tempStr += res[j];
+                            indexOfIdeas.push_back(stoi(tempStr));
+                            tempStr.clear();
+                        }
+                    }
+                    cout << endl << "Voting ideas: ";
+                    for (int i = 0; i < indexOfIdeas.size(); i++) {
+                        cout << indexOfIdeas[i] << " ";
+                    }
+
+                    cout << endl;
+                    CountingSearch(indexOfIdeas);
+                }
+                //-------------------------------------------------------------------------------------------------------------------            
 
 
                 if (bytesIn <= 0) {
@@ -155,90 +270,22 @@ int main()
                     closesocket(sock);
                     FD_CLR(sock, &master);
                 }
-                else {
-                    //Send message to other clients
-                    for (int i = 0; i < master.fd_count; i++) {
-                        SOCKET outSock = master.fd_array[i];
-                        if (outSock != listening && outSock != sock) {
-                            send(outSock, buf, bytesIn, 0);
-                        }
-                    }
-                }
+                //else {
+                //    //Send message to other clients
+                //    for (int i = 0; i < master.fd_count; i++) {
+                //        SOCKET outSock = master.fd_array[i];
+                //        if (outSock != listening && outSock != sock) {
+                //            send(outSock, buf, bytesIn, 0);
+                //        }
+                //    }
+                //}
             }
         }
     }
 
-    cout << "FUCK";
 
     //Cleanup winsock
     WSACleanup();
 
     system("pause");
 }
-
-
-
-
-
-
-
-//Wait for a connection
-    //sockaddr_in client;
-    //int clientSize = sizeof(client);
-
-    //SOCKET clientSocket = accept(listening, (sockaddr*)&client, &clientSize);
-    //if (clientSocket == INVALID_SOCKET) {
-    //    cerr << "Can`t create a socket!" << endl;
-    //    return 1;
-    //}
-
-    //char host[NI_MAXHOST];  //Client`s remote name
-    //char service[NI_MAXSERV];   //Service port the client is connect on
-
-    //ZeroMemory(host, NI_MAXHOST);
-    //ZeroMemory(service, NI_MAXSERV);
-
-    //if (!getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0)) {
-    //    cout << host << " connected on port " << service << endl;
-    //}
-    //else {
-    //    inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-    //    cout << host << " connected on port " << ntohs(client.sin_port) << endl;
-    //}
-
-    ////Close listening socket
-    //closesocket(listening);
-
-    ////While loop: accept and echo message back to client
-    //char buf[4096];
-
-    //while (1) {
-    //    ZeroMemory(buf, 4096);
-
-    //    //Wait for client to send data
-    //    int bytesReceived = recv(clientSocket, buf, 4096, 0);
-    //    if (bytesReceived == SOCKET_ERROR) {
-    //        cerr << "Error in recv()!" << endl;
-    //        break;
-    //    }
-
-    //    if (!bytesReceived) {
-    //        cout << "Client disconnected!" << endl;
-    //        break;
-    //    }
-    //    //My code==============================================================
-    //    string userInput;
-    //    cout << "User 1 > " << buf << endl;
-    //    cout << "> ";
-    //    getline(cin, userInput);
-
-
-    //    send(clientSocket, userInput.c_str(), userInput.size() + 1, 0);
-
-    //    //My code==============================================================
-
-    //    //Echo message back to client
-    //    
-    //    //send(clientSocket, buf, bytesReceived + 1, 0);        !!!
-    //}
-

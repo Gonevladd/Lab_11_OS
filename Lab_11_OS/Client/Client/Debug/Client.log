@@ -1,3 +1,4 @@
 ﻿  Client.cpp
+  The contents of <charconv> are available only with C++17 or later.
 D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Client\Client\Client.cpp(112,43): warning C4018: '<': signed/unsigned mismatch
   Client.vcxproj -> D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Client\Debug\Client.exe

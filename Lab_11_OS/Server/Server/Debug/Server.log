@@ -1,7 +1,10 @@
 ﻿  Server.cpp
-D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(26,10): warning C4101: 'ReadBuf': unreferenced local variable
-D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(29,11): warning C4101: 'dwRead': unreferenced local variable
-D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(130,31): warning C4018: '<': signed/unsigned mismatch
-D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(161,39): warning C4018: '<': signed/unsigned mismatch
-D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(94,20): warning C4101: 'stop': unreferenced local variable
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(18,23): warning C4018: '<': signed/unsigned mismatch
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(43,23): warning C4018: '<': signed/unsigned mismatch
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(50,27): warning C4018: '<': signed/unsigned mismatch
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(121,10): warning C4101: 'ReadBuf': unreferenced local variable
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(124,11): warning C4101: 'dwRead': unreferenced local variable
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(243,39): warning C4018: '<': signed/unsigned mismatch
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(258,39): warning C4018: '<': signed/unsigned mismatch
+D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Server\Server.cpp(191,20): warning C4101: 'stop': unreferenced local variable
   Server.vcxproj -> D:\Studying\Course 2\Code\Operation System\Lab_11_OS\Server\Debug\Server.exe
