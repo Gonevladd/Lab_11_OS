@@ -2,6 +2,7 @@
 #include <vector>
 #include <ws2tcpip.h>
 #include <string>
+#include <charconv>
 #pragma comment (lib, "ws2_32.lib")
 using namespace std;
 
@@ -59,12 +60,12 @@ int main()
     char buf[4096];
     string userInput;
     int countOfIdeas = 0;
-     
+
     do {
         //Prompt the user for some text
         cout << "> ";
         getline(cin, userInput);
-  
+        userInput = "a";
         if (userInput.size() > 0) {
             //Send the text
             int sendResult = send(sock, userInput.c_str(), userInput.size() + 1, 0);
@@ -75,13 +76,12 @@ int main()
                 if (bytesReceived > 0) {
                     //Echo response to console
                     cout << "SERVER > " << string(buf, 0, bytesReceived) << endl;
-
                     //Writing to file
                     //char test[] = "D:\\Studying\\Course 2\\Code\\Operation System\\Lab_11_OS\\VirtualDesk.txt";
 
 
                     HANDLE file = CreateFileA(buf, GENERIC_WRITE | GENERIC_READ | TRUNCATE_EXISTING, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL);
-                    
+
                     if (file == INVALID_HANDLE_VALUE) {
                         cout << "Cannot open file!";
                         getchar();
@@ -103,12 +103,13 @@ int main()
                         send(sock, "b", 1, 0);
                         Sleep(500);
                     }
-                    
+
                     vector<int> checkVect;
                     bool check = true;
+                    int count = 0;
                     for (int i = 0; i < 3; i++) {
                         int numb = rand() % countOfIdeas;
-                        
+
                         for (int j = 0; j < checkVect.size(); j++) {
                             if (numb == checkVect[j]) {
                                 i--;
@@ -117,9 +118,24 @@ int main()
                             }
                         }
                         if (check) {
+                            string votes;
+                            
                             checkVect.push_back(numb);
-                            string votes = to_string(numb+1);
-                            send(sock, votes.c_str(), 1, MSG_DONTROUTE);
+                            if (numb > 9) {
+                                count++;
+      
+                                votes = "i" + to_string(numb);
+                                send(sock, votes.c_str(), 3, MSG_DONTROUTE);
+                            }
+                            else {
+                                count++;
+                                votes = to_string(numb + 1);
+                                send(sock, votes.c_str(), 1, MSG_DONTROUTE);
+                            }
+                            if (count == 3) {
+                                send(sock, "e", 1, MSG_DONTROUTE);
+                            }
+                            //votes = to_string(numb+1);
                             cout << "I vote for " << votes << " idea!" << endl;
                         }
                         check = true;
@@ -137,6 +153,3 @@ int main()
     WSACleanup();
     //CloseHandle(file);
 }
-
-
-
